@@ -1,0 +1,2 @@
+export const DOCTOR_DB_CONN = 'DOCTOR_DB_CONNECTION';
+export const PG_DB_CONN = 'PG_DB_CONNECTION';
