@@ -27,14 +27,31 @@ export class PatientsService {
 async searchPatients(
   searchPatientDto: SearchPatientDto,
 ): Promise<SearchPatientResponseDto> {
+
+const hasContactSearch =
+  Array.isArray(
+    searchPatientDto.contact,
+  ) &&
+  searchPatientDto.contact.some(
+    (contact) =>
+      Boolean(
+        contact.contactValue,
+      ),
+  );
+
+
   const hasSearchCriteria = Boolean(
     searchPatientDto.hn ||
       searchPatientDto.givenName ||
       searchPatientDto.middleName ||
       searchPatientDto.familyName ||
+      searchPatientDto.otherGivenName ||
+      searchPatientDto.otherFamilyName ||
+      searchPatientDto.otherMiddleName ||
       searchPatientDto.birthDate ||
       searchPatientDto.natID ||
-      searchPatientDto.passportNumber,
+      searchPatientDto.passportNumber ||
+      hasContactSearch,
   );
 
   if (!hasSearchCriteria) {
