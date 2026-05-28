@@ -56,11 +56,6 @@ export class PatientResponseDto {
   })
   familyName?: string;
 
-  @ApiPropertyOptional({
-    description: 'Alternative title/prefix',
-    example: 'Miss.',
-  })
-  otherPrefix?: string;
 
   @ApiPropertyOptional({
     description: 'Alternative given name',
@@ -158,17 +153,6 @@ export class PatientResponseDto {
   })
   religion?: string;
 
-  @ApiPropertyOptional({
-    description: 'Ethnicity code',
-    example: '',
-  })
-  ethnicityCode?: string;
-
-  @ApiPropertyOptional({
-    description: 'Ethnicity description',
-    example: '',
-  })
-  ethnicity?: string;
 
   @ApiPropertyOptional({
     description: 'Marital status code',
@@ -212,23 +196,12 @@ export class PatientResponseDto {
   })
   zipcode?: string;
 
-  @ApiPropertyOptional({
-    description: 'Country code',
-    example: '',
-  })
-  countryCode?: string;
-
-  @ApiPropertyOptional({
-    description: 'Country description',
-    example: '',
-  })
-  country?: string;
 
   @ApiPropertyOptional({
     description: 'Patient type',
     example: '',
   })
-  patientType?: string;
+  PatientCategory?: string;
 
   @ApiPropertyOptional({
     description: 'Patient contact information',
@@ -242,17 +215,7 @@ export class PatientResponseDto {
   })
   emergencyContact?: PatientEmergencyContactDto[];
 
-  @ApiPropertyOptional({
-    description: 'Patient category',
-    example: '',
-  })
-  category?: string;
 
-  @ApiPropertyOptional({
-    description: 'Additional message',
-    example: '',
-  })
-  message?: string;
 
   @ApiPropertyOptional({
     description: 'Patient allergy information',

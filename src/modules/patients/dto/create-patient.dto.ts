@@ -57,15 +57,7 @@ export class CreatePatientDto {
   @MaxLength(255)
   familyName!: string;
 
-  @ApiPropertyOptional({
-    description: 'Alternative prefix/title',
-    example: '',
-    maxLength: 100,
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  otherPrefix?: string;
+
 
   @ApiPropertyOptional({
     description: 'Alternative given name',
@@ -227,25 +219,7 @@ export class CreatePatientDto {
   @MaxLength(100)
   religion?: string;
 
-  @ApiPropertyOptional({
-    description: 'Ethnicity code',
-    example: '',
-    maxLength: 20,
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(20)
-  ethnicityCode?: string;
-
-  @ApiPropertyOptional({
-    description: 'Ethnicity',
-    example: '',
-    maxLength: 100,
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  ethnicity?: string;
+ 
 
   @ApiPropertyOptional({
     description: 'Marital status code',
@@ -317,35 +291,17 @@ export class CreatePatientDto {
   @MaxLength(20)
   zipcode?: string;
 
-  @ApiPropertyOptional({
-    description: 'Country code',
-    example: '',
-    maxLength: 20,
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(20)
-  countryCode?: string;
+  
 
   @ApiPropertyOptional({
-    description: 'Country',
-    example: '',
+    description: 'Patient Category',
+    example: 'VIP1',
     maxLength: 100,
   })
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  country?: string;
-
-  @ApiPropertyOptional({
-    description: 'Patient type',
-    example: '',
-    maxLength: 100,
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  patientType?: string;
+  PatientCategory?: string;
 
   @ApiPropertyOptional({
     description: 'Patient contact information',
