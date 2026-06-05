@@ -18,11 +18,11 @@ export class DoctorProfileQueryDto {
   @ApiPropertyOptional({
     example: '24843',
     description:
-      'Doctor SAP code',
+      'Doctor code',
   })
   @IsOptional()
   @IsString()
-  SAPcode?: string;
+  doctor_code?: string;
 
   @ApiPropertyOptional({
     example: '24843',
@@ -64,5 +64,5 @@ export class DoctorProfileQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  Limit?: number = 20;
+  Limit?: number = 5000;
 }

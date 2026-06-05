@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import {
-  ApiProperty,
   ApiPropertyOptional,
 } from '@nestjs/swagger';
 
 import {
-  IsDateString,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -13,30 +12,39 @@ import {
 export class GetDoctorSlotRequestDto {
   @ApiPropertyOptional({
     example: '4144',
-    description: 'Location code',
+    description:
+      'Location code',
   })
   @IsOptional()
   @IsString()
   location_code?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: '10171',
-    description: 'Doctor code',
+    description:
+      'Doctor code',
   })
+  @IsOptional()
   @IsString()
   doctor_code?: string;
 
-  @ApiProperty({
-    example: '2026-05-22',
-    description: 'Start date',
+  @ApiPropertyOptional({
+    example:
+      '2026-06-05T00:00:00Z',
+    description:
+      'Start date',
   })
+  @IsOptional()
   @IsString()
   start_date?: string;
 
-  @ApiProperty({
-    example: '2026-05-25',
-    description: 'End date',
+  @ApiPropertyOptional({
+    example:
+      '2026-06-05T00:00:00Z',
+    description:
+      'End date',
   })
+  @IsOptional()
   @IsString()
   end_date?: string;
 }

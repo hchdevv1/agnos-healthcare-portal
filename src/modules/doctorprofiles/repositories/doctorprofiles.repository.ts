@@ -115,11 +115,11 @@ export class DoctorprofilesRepository {
           'doctorprofile.doctor_year2 as doctor_year2',
         ]);
 
-    if (query.SAPcode) {
+    if (query.doctor_code) {
       qb.andWhere(
         'doctorprofile.doctor_code = :SAPcode',
         {
-          SAPcode: query.SAPcode,
+          SAPcode: query.doctor_code,
         },
       );
     }

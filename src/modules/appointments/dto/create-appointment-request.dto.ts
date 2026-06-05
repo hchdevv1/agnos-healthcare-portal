@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import {
   ApiProperty,
   ApiPropertyOptional,
@@ -6,32 +7,31 @@ import {
 
 import {
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
 
 export class CreateAppointmentRequestDto {
   @ApiProperty({
-    example: '2068||69832',
+    example: '174||139486',
   })
   @IsString()
   @IsNotEmpty()
   ApptASID!: string;
 
   @ApiProperty({
-    example: '64-044546',
+    example: '60-019471',
   })
   @IsString()
   @IsNotEmpty()
   hn!: string;
 
-  @ApiProperty({
-    example: 6110189,
+  @ApiPropertyOptional({
+    example: '10171',
   })
   @IsOptional()
-  @IsNumber()
-  doctor_code?: number;
+  @IsString()
+  doctor_code?: string;
 
   @ApiPropertyOptional({
     example: '',
@@ -40,12 +40,12 @@ export class CreateAppointmentRequestDto {
   @IsString()
   doctor_desc?: string;
 
-  @ApiProperty({
-    example: 3511,
+  @ApiPropertyOptional({
+    example: '4144',
   })
   @IsOptional()
-  @IsNumber()
-  location_code?: number;
+  @IsString()
+  location_code?: string;
 
   @ApiPropertyOptional({
     example: '',
@@ -68,12 +68,12 @@ export class CreateAppointmentRequestDto {
   @IsString()
   appointment_time?: string;
 
-  @ApiProperty({
-    example: 1441,
+  @ApiPropertyOptional({
+    example: '1441',
   })
   @IsOptional()
-  @IsNumber()
-  service_code?: number;
+  @IsString()
+  service_code?: string;
 
   @ApiPropertyOptional({
     example: '',

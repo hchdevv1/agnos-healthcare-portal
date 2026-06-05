@@ -28,7 +28,7 @@ export class CreatePatientResponseDto {
     description: 'Generated hospital number',
     example: '69-000917',
   })
-  HN?: string;
+  hn?: string;
 
   @ApiPropertyOptional({
     description: 'External HIS validation errors',

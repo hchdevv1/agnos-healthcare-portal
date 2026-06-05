@@ -301,7 +301,7 @@ export class CreatePatientDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  PatientCategory?: string;
+  patientCategory?: string;
 
   @ApiPropertyOptional({
     description: 'Patient contact information',

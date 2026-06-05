@@ -1,11 +1,12 @@
-import { Controller, Body, HttpCode, HttpStatus, Post,Put } from '@nestjs/common';
+import { Controller, Body, HttpCode, HttpStatus, Post,Put ,Patch} from '@nestjs/common';
 import { PatientsService } from './patients.service';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags, } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags ,ApiExcludeEndpoint, } from '@nestjs/swagger';
 import { SearchPatientDto } from './dto/search-patient.dto';
 import { SearchPatientResponseDto } from './dto/search-patient-response.dto';
 import { CreatePatientResponseDto } from './dto/create-patient-response.dto';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
+import { PatchPatientDto } from './dto/patch-patient.dto';
 @ApiTags('Patients')
 
 @Controller('patients')
@@ -56,7 +57,9 @@ export class PatientsController {
     );
   }
 
-  @Put()
+@ApiExcludeEndpoint()
+@Put()
+
 @HttpCode(HttpStatus.OK)
 @ApiOperation({
   summary: 'Update patient',
@@ -76,6 +79,31 @@ async updatePatient(
 ): Promise<CreatePatientResponseDto> {
   return this.patientsService.updatePatient(
     updatePatientDto,
+  );
+}
+
+@Patch()
+@HttpCode(HttpStatus.OK)
+@ApiOperation({
+  summary: 'Patch patient',
+  description:
+    'Partially update patient information in external HIS system.',
+})
+@ApiBody({
+  type: PatchPatientDto,
+})
+@ApiResponse({
+  status: 200,
+  description:
+    'Patient patched successfully.',
+  type: CreatePatientResponseDto,
+})
+async patchPatient(
+  @Body()
+  patchPatientDto: PatchPatientDto,
+): Promise<CreatePatientResponseDto> {
+  return this.patientsService.patchPatient(
+    patchPatientDto,
   );
 }
 }

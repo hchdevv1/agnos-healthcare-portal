@@ -36,11 +36,11 @@ export class DoctorprofilesService {
 
     /**
      * IMPORTANT
-     * If SAPcode exists,
+     * If doctor_code exists,
      * ignore LocationCode filtering
      * and use HIS-driven flow
      */
-    if (!query.SAPcode) {
+    if (!query.doctor_code) {
       locationIds =
         await this.doctorprofilesRepository.findLocationIdsByHisLocationCode(
           query.LocationCode ??
@@ -56,18 +56,18 @@ export class DoctorprofilesService {
 
     const hisPayload = {
       LocationCode:
-        query.SAPcode
+        query.doctor_code
           ? ''
           : query.LocationCode ??
             '',
 
       Doctors:
-        query.SAPcode
+        query.doctor_code
           ? [
               {
                 doctorcode:
                   String(
-                    query.SAPcode,
+                    query.doctor_code,
                   ).trim(),
               },
             ]
@@ -133,7 +133,7 @@ export class DoctorprofilesService {
           }
 
           return {
-            SAPcode: Number(
+            doctor_code: Number(
               matchedDoctor.doctor_code,
             ),
 
@@ -227,7 +227,7 @@ export class DoctorprofilesService {
       mergedDoctors.slice(
         query.Offset ?? 0,
         (query.Offset ?? 0) +
-          (query.Limit ?? 20),
+          (query.Limit ?? 5000),
       );
 
     return {

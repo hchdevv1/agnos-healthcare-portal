@@ -13,7 +13,7 @@ import { PatientResponseDto, } from '../dto/search-patient-response.dto'
 import { CreatePatientDto, } from '../dto/create-patient.dto';
 import { UpdatePatientDto,} from '../dto/update-patient.dto';
 import { handleHisTransportError,} from '../../../common/utils/his-transport-error-handler';
-
+import { PatchPatientDto } from '../dto/patch-patient.dto';
 interface TrakcareSearchPatientResponse {
   StatusCode: number;
   total: number;
@@ -143,4 +143,36 @@ export class PatientsRepository {
       );
     }
   }
+  async patchPatient(
+  payload: PatchPatientDto,
+): Promise<CreatePatientResponseDto> {
+  const apiUrl =
+    `${process.env.TRAKCARE_URL}` +
+    `${process.env.TRAKCARE_API_GATEWAY_PATH}` +
+    `${process.env.TRAKCARE_PATIENT_UPDATE_ENDPOINT}`;
+
+  this.logger.log(
+    'Calling TRAKCARE PatchPatient API',
+  );
+
+  try {
+    const response =
+      await this.axiosClient.patch<CreatePatientResponseDto>(
+        apiUrl,
+        payload,
+      );
+
+    this.logger.log(
+      'Received response from TRAKCARE PatchPatient API',
+    );
+
+    return response.data;
+  } catch (error) {
+    handleHisTransportError(
+      error,
+      this.logger,
+      'HIS PatchPatient',
+    );
+  }
+}
 }

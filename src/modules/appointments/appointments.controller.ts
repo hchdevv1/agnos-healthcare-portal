@@ -31,7 +31,7 @@ import { CancelAppointmentResponseDto } from './dto/cancel-appointment-response.
 export class AppointmentsController {
   constructor(
     private readonly appointmentsService: AppointmentsService,
-  ) {}
+  ) { }
 
   @Post('get-appointment')
   @HttpCode(HttpStatus.OK)
@@ -57,66 +57,67 @@ export class AppointmentsController {
   }
 
   @Post('get-doctor-slot')
-@HttpCode(HttpStatus.OK)
-@ApiOperation({
-  summary: 'Get doctor appointment slots',
-})
-@ApiOkResponse({
-  description:
-    'Doctor slots retrieved successfully',
-  type: GetDoctorSlotResponseDto,
-})
-@ApiBadRequestResponse({
-  description: 'Invalid request payload',
-})
-async getDoctorSlot(
-  @Body()
-  dto: GetDoctorSlotRequestDto,
-): Promise<GetDoctorSlotResponseDto> {
-  return this.appointmentsService.getDoctorSlot(
-    dto,
-  );
-}
-@Post('create-appointment')
-@HttpCode(HttpStatus.OK)
-@ApiOperation({
-  summary: 'Create appointment',
-})
-@ApiOkResponse({
-  description:
-    'Appointment created successfully',
-  type: CreateAppointmentResponseDto,
-})
-@ApiBadRequestResponse({
-  description: 'Invalid request payload',
-})
-async createAppointment(
-  @Body()
-  dto: CreateAppointmentRequestDto,
-): Promise<CreateAppointmentResponseDto> {
-  return this.appointmentsService.createAppointment(
-    dto,
-  );
-}
-@Put('cancel-appointment')
-@HttpCode(HttpStatus.OK)
-@ApiOperation({
-  summary: 'Cancel appointment',
-})
-@ApiOkResponse({
-  description:
-    'Appointment cancelled successfully',
-  type: CancelAppointmentResponseDto,
-})
-@ApiBadRequestResponse({
-  description: 'Invalid request payload',
-})
-async cancelAppointment(
-  @Body()
-  dto: CancelAppointmentRequestDto,
-): Promise<CancelAppointmentResponseDto> {
-  return this.appointmentsService.cancelAppointment(
-    dto,
-  );
-}
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get doctor appointment slots',
+  })
+  @ApiOkResponse({
+    description:
+      'Doctor slots retrieved successfully',
+    type: GetDoctorSlotResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid request payload',
+  })
+  async getDoctorSlot(
+    @Body()
+    dto: GetDoctorSlotRequestDto,
+  ): Promise<GetDoctorSlotResponseDto> {
+    return this.appointmentsService.getDoctorSlot(
+      dto,
+    );
+  }
+  
+  @Post('create-appointment')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Create appointment',
+  })
+  @ApiOkResponse({
+    description:
+      'Appointment created successfully',
+    type: CreateAppointmentResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid request payload',
+  })
+  async createAppointment(
+    @Body()
+    dto: CreateAppointmentRequestDto,
+  ): Promise<CreateAppointmentResponseDto> {
+    return this.appointmentsService.createAppointment(
+      dto,
+    );
+  }
+  @Put('cancel-appointment')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Cancel appointment',
+  })
+  @ApiOkResponse({
+    description:
+      'Appointment cancelled successfully',
+    type: CancelAppointmentResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid request payload',
+  })
+  async cancelAppointment(
+    @Body()
+    dto: CancelAppointmentRequestDto,
+  ): Promise<CancelAppointmentResponseDto> {
+    return this.appointmentsService.cancelAppointment(
+      dto,
+    );
+  }
 }

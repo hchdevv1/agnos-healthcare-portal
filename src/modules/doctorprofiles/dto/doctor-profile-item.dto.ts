@@ -8,7 +8,7 @@ export class DoctorProfileItemDto {
   @ApiProperty({
     example: 24843,
   })
-  SAPcode?: number;
+  doctor_code?: number;
 
   @ApiProperty({
     example: 'พญ.',

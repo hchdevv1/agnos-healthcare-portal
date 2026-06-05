@@ -14,7 +14,7 @@ import { CreatePatientResponseDto } from './dto/create-patient-response.dto';
 
 import { PatientsRepository } from './repositories/patients.repository';
 import { UpdatePatientDto} from './dto/update-patient.dto';
-
+import { PatchPatientDto } from './dto/patch-patient.dto';
 @Injectable()
 export class PatientsService {
   private readonly logger =
@@ -98,7 +98,7 @@ const hasContactSearch =
     switch (response.StatusCode) {
       case 200:
         this.logger.log(
-          `Patient created successfully with HN ${response.HN}`,
+          `Patient created successfully with HN ${response.hn}`,
         );
 
         return response;
@@ -159,7 +159,7 @@ const hasContactSearch =
   switch (response.StatusCode) {
     case 200:
       this.logger.log(
-        `Patient updated successfully with HN ${response.HN}`,
+        `Patient updated successfully with HN ${response.hn}`,
       );
 
       return response;
@@ -201,6 +201,69 @@ const hasContactSearch =
     default:
       this.logger.error(
         `Unexpected TRAKCARE UpdatePatient status: ${response.StatusCode}`,
+      );
+
+      throw new BadGatewayException({
+        message:
+          'Unexpected external HIS response',
+      });
+  }
+}
+async patchPatient(
+  patchPatientDto: PatchPatientDto,
+): Promise<CreatePatientResponseDto> {
+  const response =
+    await this.patientsRepository.patchPatient(
+      patchPatientDto,
+    );
+
+  switch (response.StatusCode) {
+    case 200:
+      this.logger.log(
+        `Patient patched successfully with HN ${
+          response.hn
+        }`,
+      );
+
+      return response;
+
+    case 400:
+      this.logger.warn(
+        'TRAKCARE PatchPatient validation failed',
+      );
+
+      throw new BadRequestException({
+        message:
+          response.errors?.[0]?.message ??
+          'Patient patch validation failed',
+        errors: response.errors ?? [],
+      });
+
+    case 409:
+      this.logger.warn(
+        'TRAKCARE PatchPatient conflict detected',
+      );
+
+      throw new ConflictException({
+        message:
+          response.errors?.[0]?.message ??
+          'Patient patch conflict detected',
+        errors: response.errors ?? [],
+      });
+
+    case 500:
+      this.logger.error(
+        'TRAKCARE PatchPatient returned server error',
+      );
+
+      throw new BadGatewayException({
+        message:
+          'External HIS service error',
+      });
+
+    default:
+      this.logger.error(
+        `Unexpected TRAKCARE PatchPatient status: ${response.StatusCode}`,
       );
 
       throw new BadGatewayException({
