@@ -74,7 +74,7 @@ export class AppointmentsRepository {
     }
   }
 
-  async getDoctorSlot(
+  async getDoctorSlot2(
     payload: GetDoctorSlotRequestDto,
   ): Promise<HisGetDoctorSlotResponseDto> {
     const apiUrl =
@@ -106,7 +106,74 @@ export class AppointmentsRepository {
       );
     }
   }
+async getDoctorSlot(
+  payload: GetDoctorSlotRequestDto,
+): Promise<HisGetDoctorSlotResponseDto> {
+  const apiUrl =
+    `${process.env.TRAKCARE_URL}` +
+    `${process.env.TRAKCARE_API_GATEWAY_PATH}` +
+    `${process.env.TRAKCARE_APPOINTMENT_GET_DOCTOR_SLOT_ENDPOINT}`;
 
+  this.logger.log(
+    'Calling TRAKCARE GetDoctorSlot API',
+  );
+
+  const requestPayload = {
+    ...(payload.location_code?.trim()
+      ? {
+          location_code:
+            payload.location_code,
+        }
+      : {}),
+
+    ...(payload.doctor_code?.trim()
+      ? {
+          doctor_code:
+            payload.doctor_code,
+        }
+      : {}),
+
+    ...(payload.start_date?.trim()
+      ? {
+          start_date:
+            payload.start_date,
+        }
+      : {}),
+
+    ...(payload.end_date?.trim()
+      ? {
+          end_date:
+            payload.end_date,
+        }
+      : {}),
+  };
+
+  this.logger.log(
+    `TRAKCARE GetDoctorSlot Payload: ${JSON.stringify(
+      requestPayload,
+    )}`,
+  );
+
+  try {
+    const response =
+      await this.axiosClient.post<HisGetDoctorSlotResponseDto>(
+        apiUrl,
+        requestPayload,
+      );
+
+    this.logger.log(
+      'Received response from TRAKCARE GetDoctorSlot API',
+    );
+
+    return response.data;
+  } catch (error) {
+    handleHisTransportError(
+      error,
+      this.logger,
+      'HIS GetDoctorSlot',
+    );
+  }
+}
   async createAppointment(
     payload: CreateAppointmentRequestDto,
   ): Promise<HisCreateAppointmentResponseDto> {
