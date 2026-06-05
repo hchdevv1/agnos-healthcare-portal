@@ -45,23 +45,22 @@ export class CreateDocumentRequestDto {
   @IsOptional()
   @IsString()
   DocumentPageNo?: string;
-
-  @ApiProperty({
-    example:
-      '2026-05-22 08:12:57',
-  })
-  @Transform(({ value }) =>
-    value?.trim(),
-  )
-  @IsString()
-  @Matches(
-    /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
-    {
-      message:
-        'UploadDateTime must be in format YYYY-MM-DD HH:mm:ss',
-    },
-  )
-  UploadDateTime!: string;
+  
+@ApiProperty({
+  example: '2026-06-03T05:33:00',
+})
+@Transform(({ value }) =>
+  value?.trim(),
+)
+@IsString()
+@Matches(
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/,
+  {
+    message:
+      'UploadDateTime must be in format YYYY-MM-DDTHH:mm:ss',
+  },
+)
+UploadDateTime!: string;
 
   @ApiProperty({
     example: '123',
