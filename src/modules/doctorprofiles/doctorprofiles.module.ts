@@ -10,6 +10,7 @@ import { DoctorLocation, } from './entities/doctor-location.entity';
 import { DoctorTitle, } from './entities/doctor-title.entity';
 import { DoctorPosition, } from './entities/doctor-position.entity';
 import { DoctorType, } from './entities/doctor-type.entity';
+import { DoctorImage} from './entities/doctor-image.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature(
@@ -19,6 +20,7 @@ import { DoctorType, } from './entities/doctor-type.entity';
         DoctorTitle,
         DoctorPosition,
         DoctorType,
+        DoctorImage,
       ],
       DOCTOR_DB_CONN,
     ),

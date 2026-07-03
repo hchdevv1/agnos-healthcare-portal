@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
@@ -11,6 +13,7 @@ import { DoctorprofilesHisRepository } from './repositories/doctorprofiles-his.r
 
 import { DoctorProfileQueryDto } from './dto/doctor-profile-query.dto';
 import { GetDoctorProfileResponseDto } from './dto/get-doctor-profile-response.dto';
+import axios from 'axios';
 
 @Injectable()
 export class DoctorprofilesService {
@@ -22,17 +25,15 @@ export class DoctorprofilesService {
   constructor(
     private readonly doctorprofilesRepository: DoctorprofilesRepository,
     private readonly doctorprofilesHisRepository: DoctorprofilesHisRepository,
-  ) {}
-
+  ) { }
   async getDoctorProfiles(
     query: DoctorProfileQueryDto,
   ): Promise<GetDoctorProfileResponseDto> {
     this.logger.log(
-      `Searching doctor profiles`,
+      'Searching doctor profiles',
     );
 
-    let locationIds: number[] =
-      [];
+    let locationIds: number[] = [];
 
     /**
      * IMPORTANT
@@ -43,8 +44,7 @@ export class DoctorprofilesService {
     if (!query.doctor_code) {
       locationIds =
         await this.doctorprofilesRepository.findLocationIdsByHisLocationCode(
-          query.LocationCode ??
-            '',
+          query.LocationCode ?? '',
         );
     }
 
@@ -55,30 +55,25 @@ export class DoctorprofilesService {
       );
 
     const hisPayload = {
-      LocationCode:
-        query.doctor_code
-          ? ''
-          : query.LocationCode ??
-            '',
+      LocationCode: query.doctor_code
+        ? ''
+        : query.LocationCode ?? '',
 
-      Doctors:
-        query.doctor_code
-          ? [
-              {
-                doctorcode:
-                  String(
-                    query.doctor_code,
-                  ).trim(),
-              },
-            ]
-          : doctorProfiles.map(
-              (doctor) => ({
-                doctorcode:
-                  String(
-                    doctor.doctor_code,
-                  ).trim(),
-              }),
-            ),
+      Doctors: query.doctor_code
+        ? [
+          {
+            doctorcode: String(
+              query.doctor_code,
+            ).trim(),
+          },
+        ]
+        : doctorProfiles.map(
+          (doctor) => ({
+            doctorcode: String(
+              doctor.doctor_code,
+            ).trim(),
+          }),
+        ),
     };
 
     const hisResponse =
@@ -99,12 +94,11 @@ export class DoctorprofilesService {
       );
     }
 
-    const hisDoctors =
-      Array.isArray(
-        hisResponse.Doctors,
-      )
-        ? hisResponse.Doctors
-        : [hisResponse.Doctors];
+    const hisDoctors = Array.isArray(
+      hisResponse.Doctors,
+    )
+      ? hisResponse.Doctors
+      : [hisResponse.Doctors];
 
     const validatedDoctors =
       hisDoctors.filter(
@@ -114,111 +108,133 @@ export class DoctorprofilesService {
           ).trim() === 'Y',
       );
 
-    const mergedDoctors =
-      validatedDoctors
-        .map((hisDoctor) => {
-          const matchedDoctor =
-            doctorProfiles.find(
-              (doctor) =>
-                String(
-                  doctor.doctor_code,
-                ).trim() ===
-                String(
-                  hisDoctor.doctorcode,
-                ).trim(),
-            );
+    const imageBaseUrl =
+      process.env.DOCTOR_IMAGE_BASE_URL?.replace(
+        /\/$/,
+        '',
+      ) ?? '';
 
-          if (!matchedDoctor) {
-            return null;
-          }
+    const mergedDoctors = (
+      await Promise.all(
+        validatedDoctors.map(
+          async (hisDoctor) => {
+            const matchedDoctor =
+              doctorProfiles.find(
+                (doctor) =>
+                  String(
+                    doctor.doctor_code,
+                  ).trim() ===
+                  String(
+                    hisDoctor.doctorcode,
+                  ).trim(),
+              );
 
-          return {
-            doctor_code: Number(
-              matchedDoctor.doctor_code,
-            ),
+            if (!matchedDoctor) {
+              return null;
+            }
 
-            DoctorTitle:
-              matchedDoctor.title_name ??
-              '',
 
-            DoctorFirstName:
-              matchedDoctor.doctor_name ??
-              '',
+            const doctorImage =
+              await this.getDoctorImageBase64(matchedDoctor.doctor_image_path,);
 
-            DoctorMidName: '',
-
-            DoctorLastName: '',
-
-            DoctorENTitle:
-              matchedDoctor.title_name ??
-              '',
-
-            DoctorENFirstName:
-              matchedDoctor.doctor_engname ??
-              '',
-
-            DoctorENMidName:
-              '',
-
-            DoctorENLastName:
-              '',
-
-            DoctorCodeAtLocation:
-              Number(
+            return {
+              doctor_code: Number(
                 matchedDoctor.doctor_code,
               ),
 
-            LocationCode:
-              hisDoctor.LocationCode ??
-              '',
+              DoctorTitle:
+                matchedDoctor.title_name ??
+                '',
 
-            LocationDescTH:
-              matchedDoctor.location_name ??
-              '',
+              DoctorFirstName:
+                matchedDoctor.doctor_name ??
+                '',
 
-            LocationDescEN:
-              matchedDoctor.location_name ??
-              '',
+              DoctorMidName: '',
 
-            DoctorSpecialty: [
-              {
-                DoctorSpecialtyCode:
-                  hisDoctor.specialtycode ??
-                  '',
+              DoctorLastName: '',
 
-                DoctorSpecialtyDesc:
-                  hisDoctor.specialtyname ??
-                  '',
+              DoctorENTitle:
+                matchedDoctor.title_name ??
+                '',
 
-                DoctorSubSpecialtyCode:
-                  hisDoctor.subspecialtycode ??
-                  '',
+              DoctorENFirstName:
+                matchedDoctor.doctor_engname ??
+                '',
 
-                DoctorSubSpecialtyDesc:
-                  hisDoctor.subspecialtyname ??
-                  '',
-              },
-            ],
+              DoctorENMidName:
+                '',
 
-            EducationTH:
-              matchedDoctor.doctor_institution ??
-              '',
+              DoctorENLastName:
+                '',
 
-            EducationEN:
-              matchedDoctor.doctor_institution ??
-              '',
 
-            DoNotShowOnPatientSide:
-              false,
-          };
-        })
-        .filter(
-          (
-            doctor,
-          ): doctor is NonNullable<
-            typeof doctor
-          > => doctor !== null,
-        );
+              DoctorCodeAtLocation:
+                Number(
+                  matchedDoctor.doctor_code,
+                ),
+
+              LocationCode:
+                hisDoctor.LocationCode ??
+                '',
+
+              LocationDescTH:
+                matchedDoctor.location_name ??
+                '',
+
+              LocationDescEN:
+                matchedDoctor.location_name ??
+                '',
+
+              DoctorSpecialty: [
+                {
+                  DoctorSpecialtyCode:
+                    hisDoctor.specialtycode ??
+                    '',
+
+                  DoctorSpecialtyDesc:
+                    hisDoctor.specialtyname ??
+                    '',
+
+                  DoctorSubSpecialtyCode:
+                    hisDoctor.subspecialtycode ??
+                    '',
+
+                  DoctorSubSpecialtyDesc:
+                    hisDoctor.subspecialtyname ??
+                    '',
+                },
+              ],
+
+              EducationTH:
+                matchedDoctor.doctor_institution ??
+                '',
+
+              EducationEN:
+                matchedDoctor.doctor_institution ??
+                '',
+
+              DoNotShowOnPatientSide:
+                false,
+                       
+              DoctorimageURL:
+                matchedDoctor.doctor_image_path
+                  ? `${imageBaseUrl}/${matchedDoctor.doctor_image_path.replace(/\\/g, '/')}`
+                  : '',
+
+              Doctorimage:
+                doctorImage,
+            };
+          },
+        ),
+      )
+    ).filter(
+      (
+        doctor,
+      ): doctor is NonNullable<
+        typeof doctor
+      > => doctor !== null,
+    );
 
     const total =
       mergedDoctors.length;
@@ -227,7 +243,7 @@ export class DoctorprofilesService {
       mergedDoctors.slice(
         query.Offset ?? 0,
         (query.Offset ?? 0) +
-          (query.Limit ?? 5000),
+        (query.Limit ?? 5000),
       );
 
     return {
@@ -235,5 +251,49 @@ export class DoctorprofilesService {
       DoctorList:
         paginatedDoctors,
     };
+  }
+
+  private async getDoctorImageBase64(
+    imagePath: string | null | undefined,
+  ): Promise<string> {
+    if (!imagePath) {
+      return '';
+    }
+
+    try {
+      const baseUrl =
+        process.env.DOCTOR_IMAGE_FETCH_URL?.replace(
+          /\/$/,
+          '',
+        ) ?? '';
+
+      const imageUrl =
+        `${baseUrl}/${imagePath.replace(/\\/g, '/')}`;
+
+      const response =
+        await axios.get(
+          imageUrl,
+          {
+            responseType: 'arraybuffer',
+            timeout:
+              Number(
+                process.env.DOCTOR_IMAGE_TIMEOUT,
+              ) || 5000,
+          },
+        );
+
+      return Buffer.from(
+        response.data,
+      ).toString('base64');
+    } catch (error) {
+      this.logger.error(
+        `Unable to download doctor image: ${imagePath}`,
+        error instanceof Error
+          ? error.stack
+          : String(error),
+      );
+
+      return '';
+    }
   }
 }

@@ -15,22 +15,28 @@ import { DOCTOR_DB_CONN } from '../../../database/constants/connection.constant'
 import { DoctorProfile } from '../entities/doctor-profile.entity';
 import { DoctorLocation } from '../entities/doctor-location.entity';
 import { DoctorProfileQueryDto } from '../dto/doctor-profile-query.dto';
-
+import { DoctorImage } from '../entities/doctor-image.entity';
 @Injectable()
 export class DoctorprofilesRepository {
   constructor(
     @InjectRepository(
       DoctorProfile,
+
       DOCTOR_DB_CONN,
     )
     private readonly doctorProfileRepository: Repository<DoctorProfile>,
+     @InjectRepository(
+    DoctorImage,
+    DOCTOR_DB_CONN,
+  )
+  private readonly doctorImageRepository: Repository<DoctorImage>,
 
     @InjectRepository(
       DoctorLocation,
       DOCTOR_DB_CONN,
     )
     private readonly doctorLocationRepository: Repository<DoctorLocation>,
-  ) {}
+  ) { }
 
   async findLocationIdsByHisLocationCode(
     locationCode: string,
@@ -52,17 +58,17 @@ export class DoctorprofilesRepository {
         )
         .getMany();
 
-   return locations
-  .map(
-    (item) =>
-      item.location_id,
-  )
-  .filter(
-    (
-      locationId,
-    ): locationId is number =>
-      locationId !== undefined,
-  );
+    return locations
+      .map(
+        (item) =>
+          item.location_id,
+      )
+      .filter(
+        (
+          locationId,
+        ): locationId is number =>
+          locationId !== undefined,
+      );
   }
 
   async findDoctorProfiles(
@@ -113,7 +119,21 @@ export class DoctorprofilesRepository {
           'doctorprofile.doctor_institution2 as doctor_institution2',
           'doctorprofile.doctor_branch2 as doctor_branch2',
           'doctorprofile.doctor_year2 as doctor_year2',
-        ]);
+        ]).addSelect(
+  (subQuery) =>
+    subQuery
+      .select('docimg.docimg_name')
+      .from('doctor_img', 'docimg')
+      .where(
+        'docimg.doctor_id = doctorprofile.doctor_id',
+      )
+      .orderBy(
+        'docimg.docimg_id',
+        'DESC',
+      )
+      .limit(1),
+  'doctor_image_path',
+);
 
     if (query.doctor_code) {
       qb.andWhere(

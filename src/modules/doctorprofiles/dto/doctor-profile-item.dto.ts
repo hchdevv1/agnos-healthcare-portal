@@ -95,4 +95,19 @@ export class DoctorProfileItemDto {
     example: true,
   })
   DoNotShowOnPatientSide?: boolean;
+
+ @ApiProperty({
+    example: '//XX.XX.XX.XX/XXX/XXXX/XXXX.jpg',
+    description: 'URL สำหรับเรียกดูรูปแพทย์',
+  })
+  DoctorimageURL?: string;
+
+  @ApiProperty({
+    type: String,
+    format: 'byte',
+    required: false,
+    example: '/9j/4AAQSkZJRgABAQAAAQABAAD...',
+    description: 'รูปแพทย์ในรูปแบบ Base64 (ไม่รวม data:image/jpeg;base64,)',
+  })
+  Doctorimage?: string;
 }
