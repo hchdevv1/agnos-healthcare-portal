@@ -141,6 +141,7 @@ export class AppointmentsService {
               item.Appointments.appointment_status,
 
             note: item.Appointments.note,
+            overbook: item.Appointments.overbook,
           },
         };
       },

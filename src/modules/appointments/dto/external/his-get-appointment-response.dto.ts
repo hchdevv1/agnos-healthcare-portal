@@ -22,6 +22,8 @@ export class HisAppointmentDetailDto {
   appointment_status?: string;
 
   note?: string;
+
+  overbook?:boolean;
 }
 
 export class HisGetAppointmentResponseDto {

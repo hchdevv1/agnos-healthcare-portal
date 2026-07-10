@@ -60,6 +60,11 @@ export class AppointmentDto {
     example: '',
   })
   note?: string;
+
+@ApiProperty({
+    example: true,
+  })
+  overbook?: boolean;
 }
 
 export class GetAppointmentResponseDto {
