@@ -15,6 +15,9 @@ import { CreatePatientResponseDto } from './dto/create-patient-response.dto';
 import { PatientsRepository } from './repositories/patients.repository';
 import { UpdatePatientDto} from './dto/update-patient.dto';
 import { PatchPatientDto } from './dto/patch-patient.dto';
+
+import { SsoEligibleDto } from './dto/sso-eligible.dto';
+import { SsoEligibleResponseDto } from './dto/sso-eligible-response.dto';
 @Injectable()
 export class PatientsService {
   private readonly logger =
@@ -271,5 +274,23 @@ async patchPatient(
           'Unexpected external HIS response',
       });
   }
+}
+async checkSsoEligible(
+  ssoEligibleDto: SsoEligibleDto,
+): Promise<SsoEligibleResponseDto> {
+  this.logger.log(
+    `Checking SSO eligibility for natID ${ssoEligibleDto.natID}`,
+  );
+
+  const response =
+    await this.patientsRepository.checkSsoEligible(
+      ssoEligibleDto,
+    );
+
+  this.logger.log(
+    `SSO eligibility check completed for natID ${ssoEligibleDto.natID}`,
+  );
+
+  return response;
 }
 }

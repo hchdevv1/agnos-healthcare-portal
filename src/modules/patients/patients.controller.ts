@@ -7,6 +7,8 @@ import { CreatePatientResponseDto } from './dto/create-patient-response.dto';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PatchPatientDto } from './dto/patch-patient.dto';
+import { SsoEligibleDto } from './dto/sso-eligible.dto';
+import { SsoEligibleResponseDto } from './dto/sso-eligible-response.dto';
 @ApiTags('Patients')
 
 @Controller('patients')
@@ -104,6 +106,30 @@ async patchPatient(
 ): Promise<CreatePatientResponseDto> {
   return this.patientsService.patchPatient(
     patchPatientDto,
+  );
+}
+
+@Post('sso-eligible')
+@HttpCode(HttpStatus.OK)
+@ApiOperation({
+  summary: 'Check SSO eligibility',
+  description:
+    'Check patient information from NHSO using national ID.',
+})
+@ApiBody({
+  type: SsoEligibleDto,
+})
+@ApiResponse({
+  status: 200,
+  description:
+    'Patient information retrieved successfully.',
+  type: SsoEligibleResponseDto,
+})
+async checkSsoEligible(
+  @Body() ssoEligibleDto: SsoEligibleDto,
+): Promise<SsoEligibleResponseDto> {
+  return this.patientsService.checkSsoEligible(
+    ssoEligibleDto,
   );
 }
 }

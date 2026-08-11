@@ -2,11 +2,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import axios, {
   AxiosInstance,
+  AxiosError,
 } from 'axios';
 
 import {
   Injectable,
   Logger,
+  BadRequestException
 } from '@nestjs/common';
 
 import { SearchPatientDto } from '../dto/search-patient.dto';
@@ -16,12 +18,23 @@ import { CreatePatientDto, } from '../dto/create-patient.dto';
 import { UpdatePatientDto, } from '../dto/update-patient.dto';
 import { handleHisTransportError, } from '../../../common/utils/his-transport-error-handler';
 import { PatchPatientDto } from '../dto/patch-patient.dto';
+import { SsoEligibleDto } from '../dto/sso-eligible.dto';
+import { SsoEligibleResponseDto } from '../dto/sso-eligible-response.dto';
+import { NhsoRightSearchResponseDto } from '../dto/external/nhso-right-search-response.dto';
+import { HchSsoResponse } from '../dto/external/hch-sso-response.dto';
 interface TrakcareSearchPatientResponse {
   StatusCode: number;
   total: number;
   patient: PatientResponseDto[];
 }
+interface NhsoValidationError {
+  defaultMessage?: string;
+  field?: string;
+}
 
+interface NhsoErrorResponse {
+  errors?: NhsoValidationError[];
+}
 @Injectable()
 export class PatientsRepository {
   private readonly logger = new Logger(
@@ -387,6 +400,310 @@ async patchPatient(
     );
   }
 }
+async checkSsoEligible(
+  payload: SsoEligibleDto,
+): Promise<SsoEligibleResponseDto> {
+  const apiUrl =
+    `${process.env.NHSO_BASE_URL}` +
+    `${process.env.NHSO_RIGHT_SEARCH_ENDPOINT}` +
+    `?pid=${encodeURIComponent(
+      payload.natID,
+    )}`;
+
+  this.logger.log(
+    'Calling NHSO right-search API',
+  );
+
+  try {
+    const response =
+      await this.axiosClient.get<NhsoRightSearchResponseDto>(
+        apiUrl,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.NHSO_TOKEN}`,
+          },
+        },
+      );
+
+    const nhsoResponse =
+      response.data;
+
+    /*
+     * Check SSO eligibility
+     *
+     * Eligible when:
+     * funds[].hospMain.hcode === 11750
+     * OR
+     * funds[].hospSss.hcode === 11750
+     */
+    const eligible =
+      nhsoResponse.funds?.some(
+        (fund) =>
+          fund.hospMain?.hcode ===
+            '11750' ||
+          fund.hospSss?.hcode ===
+            '11750',
+      ) ?? false;
+
+    /*
+     * Patient name
+     */
+    const title =
+      nhsoResponse.tname ?? '';
+
+    const firstname =
+      nhsoResponse.fname ?? '';
+
+    const lastname =
+      nhsoResponse.lname ?? '';
+
+    const fullName =
+      [
+        title,
+        firstname,
+        lastname,
+      ]
+        .filter(
+          (value) =>
+            value !== '',
+        )
+        .join(' ');
+
+    /*
+     * Patient DOB
+     *
+     * NHSO birthDateNew uses Gregorian year.
+     * Response format:
+     * YYYY-MM-DD
+     */
+    const year =
+      nhsoResponse.birthDateNew
+        ?.year;
+
+    const month =
+      nhsoResponse.birthDateNew
+        ?.month;
+
+    const day =
+      nhsoResponse.birthDateNew
+        ?.day;
+
+    let dob = '';
+
+    if (
+      year !== undefined &&
+      month !== undefined &&
+      day !== undefined
+    ) {
+      dob =
+        `${year}-` +
+        `${String(month).padStart(2, '0')}-` +
+        `${String(day).padStart(2, '0')}`;
+    }
+
+    this.logger.log(
+      `NHSO right-search completed, eligible=${eligible}`,
+    );
+
+    return {
+      eligible,
+      patient: {
+        ssoid:
+          nhsoResponse.pid ?? '',
+        title,
+        firstname,
+        lastname,
+        FullName: fullName,
+        DOB: dob,
+        Gender:
+          nhsoResponse.sex?.name ??
+          '',
+      },
+    };
+  } catch (error: unknown) {
+    /*
+     * ==========================================
+     * NHSO Error Handling
+     * ==========================================
+     */
+    if (
+      axios.isAxiosError(error)
+    ) {
+      const axiosError =
+        error as AxiosError<NhsoErrorResponse>;
+
+      /*
+       * NHSO validation error
+       *
+       * Do NOT fallback to HCH.
+       */
+      if (
+        axiosError.response?.status ===
+        400
+      ) {
+        const message =
+          axiosError.response.data
+            ?.errors?.[0]
+            ?.defaultMessage ??
+          'NHSO validation failed';
+
+        this.logger.warn(
+          `NHSO right-search validation failed: ${message}`,
+        );
+
+        throw new BadRequestException(
+          message,
+        );
+      }
+
+      /*
+       * NHSO transport / connection failure
+       *
+       * Fallback to HCH Intra API.
+       */
+      const shouldFallback =
+        axiosError.code ===
+          'ECONNABORTED' ||
+        axiosError.code ===
+          'ETIMEDOUT' ||
+        axiosError.code ===
+          'ECONNREFUSED' ||
+        axiosError.code ===
+          'ENOTFOUND';
+
+      if (shouldFallback) {
+        this.logger.warn(
+          'NHSO right-search unavailable, switching to HCH Intra SSO API',
+        );
+
+        const hchApiUrl =
+          `${process.env.TRAKCARE_URL}` +
+          `${process.env.TRAKCARE_HCH_SSO_PATH}` +
+          `${encodeURIComponent(
+            payload.natID,
+          )}`;
+
+        this.logger.log(
+          'Calling HCH Intra GetPatientSSO API',
+        );
+
+        try {
+          const hchResponse =
+            await this.axiosClient.get<HchSsoResponse>(
+              hchApiUrl,
+            );
+
+          const patientInfo =
+            hchResponse.data?.PatientInfo;
+
+          const ssoid =
+            patientInfo?.ssoid ?? '';
+
+          /*
+           * HCH SSO eligibility
+           *
+           * ssoid has value = eligible
+           */
+          const eligible =
+            ssoid.trim() !== '';
+
+          /*
+           * HCH DOB
+           *
+           * HCH returns:
+           * DD/MM/YYYY
+           *
+           * The year is Buddhist Era (B.E.).
+           *
+           * Example:
+           * 15/07/2528
+           * ->
+           * 1985-07-15
+           */
+          const hchDob =
+            patientInfo?.DOB ?? '';
+
+          let dob = '';
+
+          const dobParts =
+            hchDob.split('/');
+
+          if (
+            dobParts.length === 3
+          ) {
+            const day =
+              dobParts[0];
+
+            const month =
+              dobParts[1];
+
+            const buddhistYear =
+              Number(
+                dobParts[2],
+              );
+
+            if (
+              day &&
+              month &&
+              !Number.isNaN(
+                buddhistYear,
+              )
+            ) {
+              dob =
+                `${buddhistYear - 543}-` +
+                `${month.padStart(2, '0')}-` +
+                `${day.padStart(2, '0')}`;
+            }
+          }
+
+          this.logger.log(
+            `HCH Intra GetPatientSSO completed, eligible=${eligible}`,
+          );
+
+          return {
+            eligible,
+            patient: {
+              ssoid,
+              title:
+                patientInfo?.title ??
+                '',
+              firstname:
+                patientInfo?.firstname ??
+                '',
+              lastname:
+                patientInfo?.lastname ??
+                '',
+              FullName:
+                patientInfo?.FullName ??
+                '',
+              DOB: dob,
+              Gender:
+                patientInfo?.Gender ??
+                '',
+            },
+          };
+        } catch (
+          fallbackError: unknown
+        ) {
+          handleHisTransportError(
+            fallbackError,
+            this.logger,
+            'HCH Intra GetPatientSSO',
+          );
+        }
+      }
+    }
+
+    /*
+     * Other NHSO transport errors
+     */
+    handleHisTransportError(
+      error,
+      this.logger,
+      'NHSO right-search',
+    );
+  }
+}
   private removeEmptyFields<T>(
     obj: T,
   ): T {
@@ -482,4 +799,5 @@ async patchPatient(
 
     return obj;
   }
+  
 }
