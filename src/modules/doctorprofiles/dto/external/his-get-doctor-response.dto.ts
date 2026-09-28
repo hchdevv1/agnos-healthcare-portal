@@ -7,6 +7,7 @@ export class HisDoctorItemDto {
   subspecialtycode?: string;
   subspecialtyname?: string;
   flag?: string;
+  gender?: string;
 }
 
 export class HisGetDoctorResponseDto {

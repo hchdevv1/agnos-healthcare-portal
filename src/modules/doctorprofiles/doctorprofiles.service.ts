@@ -141,7 +141,7 @@ export class DoctorprofilesService {
               doctor_code: Number(
                 matchedDoctor.doctor_code,
               ),
-
+            
               DoctorTitle:
                 matchedDoctor.title_name ??
                 '',
@@ -167,7 +167,7 @@ export class DoctorprofilesService {
 
               DoctorENLastName:
                 '',
-
+          Gender: hisDoctor.gender ?? '',
 
               DoctorCodeAtLocation:
                 Number(

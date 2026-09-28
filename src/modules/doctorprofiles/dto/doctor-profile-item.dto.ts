@@ -51,6 +51,10 @@ export class DoctorProfileItemDto {
     example: '',
   })
   DoctorENLastName?: string;
+  @ApiProperty({
+    example: 'Female',
+  })
+  Gender?: string;
 
   @ApiProperty({
     example: 24843,
