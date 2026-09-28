@@ -9,6 +9,11 @@ import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PatchPatientDto } from './dto/patch-patient.dto';
 import { SsoEligibleDto } from './dto/sso-eligible.dto';
 import { SsoEligibleResponseDto } from './dto/sso-eligible-response.dto';
+import { GetPatientImageDto } from './dto/get-patient-image.dto';
+import { GetPatientImageResponseDto } from './dto/get-patient-image-response.dto';
+import { UpdatePatientImageDto } from './dto/update-patient-image.dto';
+import { UpdatePatientImageResponseDto } from './dto/update-patient-image-response.dto';
+
 @ApiTags('Patients')
 
 @Controller('patients')
@@ -130,6 +135,51 @@ async checkSsoEligible(
 ): Promise<SsoEligibleResponseDto> {
   return this.patientsService.checkSsoEligible(
     ssoEligibleDto,
+  );
+}
+@Post('get-image')
+@HttpCode(HttpStatus.OK)
+@ApiOperation({
+  summary: 'Get patient image',
+  description:
+    'Retrieve patient image from external HIS system using HN.',
+})
+@ApiBody({
+  type: GetPatientImageDto,
+})
+@ApiResponse({
+  status: 200,
+  description:
+    'Patient image retrieved successfully.',
+  type: GetPatientImageResponseDto,
+})
+async getPatientImage(
+  @Body() getPatientImageDto: GetPatientImageDto,
+): Promise<GetPatientImageResponseDto> {
+  return this.patientsService.getPatientImage(
+    getPatientImageDto,
+  );
+}
+@Post('update-image')
+@HttpCode(HttpStatus.OK)
+@ApiOperation({
+  summary: 'Update patient image',
+  description:
+    'Update patient image in external HIS system.',
+})
+@ApiBody({
+  type: UpdatePatientImageDto,
+})
+@ApiResponse({
+  status: 200,
+  description: 'Patient image updated successfully.',
+  type: UpdatePatientImageResponseDto,
+})
+async updatePatientImage(
+  @Body() updatePatientImageDto: UpdatePatientImageDto,
+): Promise<UpdatePatientImageResponseDto> {
+  return this.patientsService.updatePatientImage(
+    updatePatientImageDto,
   );
 }
 }

@@ -22,6 +22,10 @@ import { SsoEligibleDto } from '../dto/sso-eligible.dto';
 import { SsoEligibleResponseDto } from '../dto/sso-eligible-response.dto';
 import { NhsoRightSearchResponseDto } from '../dto/external/nhso-right-search-response.dto';
 import { HchSsoResponse } from '../dto/external/hch-sso-response.dto';
+import { GetPatientImageDto } from '../dto/get-patient-image.dto';
+import { GetPatientImageResponseDto } from '../dto/get-patient-image-response.dto';
+import { UpdatePatientImageDto } from '../dto/update-patient-image.dto';
+import { UpdatePatientImageResponseDto } from '../dto/update-patient-image-response.dto';
 interface TrakcareSearchPatientResponse {
   StatusCode: number;
   total: number;
@@ -799,5 +803,68 @@ async checkSsoEligible(
 
     return obj;
   }
-  
+  async getPatientImage(
+  payload: GetPatientImageDto,
+): Promise<GetPatientImageResponseDto> {
+  const apiUrl =
+    `${process.env.TRAKCARE_URL}` +
+    `${process.env.TRAKCARE_API_GATEWAY_PATH}` +
+    `${process.env.TRAKCARE_PATIENT_IMAGE_ENDPOINT}`;
+
+  this.logger.log(
+    'Calling TRAKCARE GetPatientProfile API',
+  );
+
+  try {
+    const response =
+      await this.axiosClient.post<GetPatientImageResponseDto>(
+        apiUrl,
+        payload,
+      );
+
+    this.logger.log(
+      'Received response from TRAKCARE GetPatientProfile API',
+    );
+
+    return response.data;
+  } catch (error) {
+    handleHisTransportError(
+      error,
+      this.logger,
+      'HIS GetPatientProfile',
+    );
+  }
+}
+async updatePatientImage(
+  payload: UpdatePatientImageDto,
+): Promise<UpdatePatientImageResponseDto> {
+  const apiUrl =
+    `${process.env.TRAKCARE_URL}` +
+    `${process.env.TRAKCARE_API_GATEWAY_PATH}` +
+    `${process.env.TRAKCARE_PATIENT_IMAGE_UPDATE_ENDPOINT}`;
+
+  this.logger.log(
+    `Calling TRAKCARE UpdatePatientProfile API for HN ${payload.hn}`,
+  );
+
+  try {
+    const response =
+      await this.axiosClient.post<UpdatePatientImageResponseDto>(
+        apiUrl,
+        payload,
+      );
+
+    this.logger.log(
+      `Patient image updated successfully for HN ${payload.hn}`,
+    );
+
+    return response.data;
+  } catch (error) {
+    handleHisTransportError(
+      error,
+      this.logger,
+      'HIS UpdatePatientProfile',
+    );
+  }
+}
 }

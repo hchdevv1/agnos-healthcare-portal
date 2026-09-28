@@ -18,6 +18,11 @@ import { PatchPatientDto } from './dto/patch-patient.dto';
 
 import { SsoEligibleDto } from './dto/sso-eligible.dto';
 import { SsoEligibleResponseDto } from './dto/sso-eligible-response.dto';
+
+import { GetPatientImageDto } from './dto/get-patient-image.dto';
+import { GetPatientImageResponseDto } from './dto/get-patient-image-response.dto';
+import { UpdatePatientImageDto } from './dto/update-patient-image.dto';
+import { UpdatePatientImageResponseDto } from './dto/update-patient-image-response.dto';
 @Injectable()
 export class PatientsService {
   private readonly logger =
@@ -292,5 +297,35 @@ async checkSsoEligible(
   );
 
   return response;
+}
+async getPatientImage(
+  getPatientImageDto: GetPatientImageDto,
+): Promise<GetPatientImageResponseDto> {
+  this.logger.log(
+    `Getting patient image for HN ${getPatientImageDto.hn}`,
+  );
+
+  const response =
+    await this.patientsRepository.getPatientImage(
+      getPatientImageDto,
+    );
+
+  this.logger.log(
+    `Patient image retrieved for HN ${getPatientImageDto.hn}`,
+  );
+
+  return response;
+}
+
+async updatePatientImage(
+  updatePatientImageDto: UpdatePatientImageDto,
+): Promise<UpdatePatientImageResponseDto> {
+  this.logger.log(
+    `Updating patient image for HN ${updatePatientImageDto.hn}`,
+  );
+
+  return this.patientsRepository.updatePatientImage(
+    updatePatientImageDto,
+  );
 }
 }
