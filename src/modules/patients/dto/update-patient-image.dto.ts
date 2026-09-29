@@ -11,12 +11,7 @@ export class UpdatePatientImageDto {
   @MaxLength(50)
   hn?: string;
 
-  @ApiProperty({
-    example: '',
-    description: 'Image upload timestamp',
-  })
-  @IsString()
-  uploadTimeStamp?: string;
+ 
 
   @ApiProperty({
     description: 'Patient image in Base64 format',
