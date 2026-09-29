@@ -4,10 +4,13 @@ import { SwaggerModule, DocumentBuilder, } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app =
     await NestFactory.create(AppModule,{bufferLogs: true,},);
+  app.use(json({ limit: '10mb' }));
+  app.use(urlencoded({ extended: true, limit: '10mb' }));
   app.setGlobalPrefix(
     process.env.API_PREFIX || 'api/v1',
   );
