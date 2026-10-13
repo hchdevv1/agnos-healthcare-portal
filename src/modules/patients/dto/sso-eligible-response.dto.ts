@@ -47,6 +47,45 @@ export class SsoEligiblePatientDto {
     example: 'หญิง',
   })
   Gender!: string;
+
+  
+}
+export class SsoEligibleHuachiewEmployeeDto {
+  @ApiProperty({
+    description: 'Huachiew employee code',
+    example: '6110189',
+  })
+  empcode!: string;
+
+  @ApiProperty({
+    description: 'Employee position',
+    example: 'เจ้าหน้าที่พัฒนาระบบคอมพิวเตอร์สารสนเทศ',
+  })
+  position!: string;
+
+  @ApiProperty({
+    description: 'Employee location code',
+    example: '4110',
+  })
+  loccode!: string;
+
+  @ApiProperty({
+    description: 'Employee location name',
+    example: 'ศูนย์คอมพิวเตอร์และสารสนเทศ',
+  })
+  locname!: string;
+
+  @ApiProperty({
+    description: 'Employee start date',
+    example: '2018-08-01',
+  })
+  startdate!: string;
+
+  @ApiProperty({
+    description: 'Whether the patient is a Huachiew employee',
+    example: true,
+  })
+  empflag!: boolean;
 }
 
 export class SsoEligibleResponseDto {
@@ -62,4 +101,12 @@ export class SsoEligibleResponseDto {
     type: SsoEligiblePatientDto,
   })
   patient!: SsoEligiblePatientDto;
+ @ApiProperty({
+    description: 'Huachiew employee information',
+    type: SsoEligibleHuachiewEmployeeDto,
+    nullable: true,
+  })
+  huachiewEmployee!: SsoEligibleHuachiewEmployeeDto | null;
+
+
 }

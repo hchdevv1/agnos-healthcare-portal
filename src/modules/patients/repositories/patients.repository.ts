@@ -19,7 +19,8 @@ import { UpdatePatientDto, } from '../dto/update-patient.dto';
 import { handleHisTransportError, } from '../../../common/utils/his-transport-error-handler';
 import { PatchPatientDto } from '../dto/patch-patient.dto';
 import { SsoEligibleDto } from '../dto/sso-eligible.dto';
-import { SsoEligibleResponseDto } from '../dto/sso-eligible-response.dto';
+import {   SsoEligibleHuachiewEmployeeDto,
+SsoEligibleResponseDto } from '../dto/sso-eligible-response.dto';
 import { NhsoRightSearchResponseDto } from '../dto/external/nhso-right-search-response.dto';
 import { HchSsoResponse } from '../dto/external/hch-sso-response.dto';
 import { GetPatientImageDto } from '../dto/get-patient-image.dto';
@@ -38,6 +39,16 @@ interface NhsoValidationError {
 
 interface NhsoErrorResponse {
   errors?: NhsoValidationError[];
+}
+interface HuachiewEmployeeApiResponse {
+  employeeinfo?: {
+    empcode?: string;
+    position?: string;
+    loccode?: string;
+    locname?: string;
+    startdate?: string;
+    empflag?: boolean;
+  };
 }
 @Injectable()
 export class PatientsRepository {
@@ -508,6 +519,8 @@ async checkSsoEligible(
     this.logger.log(
       `NHSO right-search completed, eligible=${eligible}`,
     );
+const huachiewEmployee =
+  await this.checkHuachiewEmployee(payload.natID);
 
     return {
       eligible,
@@ -522,7 +535,8 @@ async checkSsoEligible(
         Gender:
           nhsoResponse.sex?.name ??
           '',
-      },
+        },
+  huachiewEmployee,
     };
   } catch (error: unknown) {
     /*
@@ -663,7 +677,8 @@ async checkSsoEligible(
           this.logger.log(
             `HCH Intra GetPatientSSO completed, eligible=${eligible}`,
           );
-
+const huachiewEmployee =
+  await this.checkHuachiewEmployee(payload.natID);
           return {
             eligible,
             patient: {
@@ -684,7 +699,7 @@ async checkSsoEligible(
               Gender:
                 patientInfo?.Gender ??
                 '',
-            },
+            },huachiewEmployee,
           };
         } catch (
           fallbackError: unknown
@@ -708,6 +723,67 @@ async checkSsoEligible(
     );
   }
 }
+
+private async checkHuachiewEmployee(
+  natID: string,
+): Promise<SsoEligibleHuachiewEmployeeDto | null> {
+  const apiUrl =
+    `${process.env.TRAKCARE_URL}` +
+    `${process.env.TRAKCARE_API_GATEWAY_PATH}` +
+    `${process.env.TRAKCARE_EMPLOYEE_ENDPOINT}`;
+
+  try {
+    this.logger.log(
+      'Calling TRAKCARE GetEmployee API',
+    );
+
+    const response =
+      await this.axiosClient.post<HuachiewEmployeeApiResponse>(
+        apiUrl,
+        { natID },
+      );
+
+    const employeeInfo =
+      response.data?.employeeinfo;
+
+    if (
+      !employeeInfo ||
+      typeof employeeInfo.empflag !== 'boolean'
+    ) {
+      this.logger.warn(
+        'TRAKCARE GetEmployee returned an invalid response',
+      );
+
+      return null;
+    }
+
+    const employee: SsoEligibleHuachiewEmployeeDto = {
+      empcode: employeeInfo.empcode ?? '',
+      position: employeeInfo.position ?? '',
+      loccode: employeeInfo.loccode ?? '',
+      locname: employeeInfo.locname ?? '',
+      startdate: employeeInfo.startdate ?? '',
+      empflag: employeeInfo.empflag,
+    };
+
+    this.logger.log(
+      `TRAKCARE GetEmployee completed, empflag=${employee.empflag}`,
+    );
+
+    return employee;
+  } catch (error: unknown) {
+    this.logger.warn(
+      `TRAKCARE GetEmployee unavailable: ${
+        axios.isAxiosError(error)
+          ? error.code ?? error.message
+          : 'Unexpected error'
+      }`,
+    );
+
+    return null;
+  }
+}
+
   private removeEmptyFields<T>(
     obj: T,
   ): T {
