@@ -155,7 +155,7 @@ export class DoctorprofilesService {
               DoctorLastName: '',
 
               DoctorENTitle:
-                matchedDoctor.title_name ??
+                matchedDoctor.title_name_EN ??
                 '',
 
               DoctorENFirstName:

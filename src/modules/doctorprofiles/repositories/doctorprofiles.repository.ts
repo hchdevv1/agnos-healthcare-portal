@@ -119,6 +119,7 @@ export class DoctorprofilesRepository {
           'doctorprofile.doctor_institution2 as doctor_institution2',
           'doctorprofile.doctor_branch2 as doctor_branch2',
           'doctorprofile.doctor_year2 as doctor_year2',
+          'emptitle.title_name_EN as title_name_EN',
         ]).addSelect(
   (subQuery) =>
     subQuery
